@@ -37,6 +37,26 @@ BEFORE claiming any status or expressing satisfaction:
 Skip any step = lying, not verifying
 ```
 
+## The Commit Gate
+
+```
+VERIFICATION PASSING DOES NOT AUTHORIZE COMMITTING.
+```
+
+After verification succeeds, **report results and wait for explicit user instruction to commit.** Never proceed to `git commit` automatically. The user decides when and what to commit.
+
+```
+AFTER verification passes:
+
+1. REPORT: Present verification evidence to the user
+2. WAIT: Ask if the user wants to commit
+3. ONLY ON EXPLICIT APPROVAL: Proceed to commit (using the committing skill)
+
+Auto-committing after verification = overstepping, not efficiency
+```
+
+This gate exists because verification answers "does it work?" — only the user answers "should we commit this?"
+
 ## Common Failures
 
 | Claim | Requires | Not Sufficient |
@@ -59,6 +79,7 @@ Skip any step = lying, not verifying
 - Thinking "just this once"
 - Tired and wanting work over
 - **ANY wording implying success without having run verification**
+- Auto-committing after verification without explicit user approval
 
 ## Rationalization Prevention
 
@@ -72,6 +93,7 @@ Skip any step = lying, not verifying
 | "I'm tired" | Exhaustion ≠ excuse |
 | "Partial check is enough" | Partial proves nothing |
 | "Different words so rule doesn't apply" | Spirit over letter |
+| "Verification passed, so I'll commit" | Verification ≠ commit authorization |
 
 ## Key Patterns
 
