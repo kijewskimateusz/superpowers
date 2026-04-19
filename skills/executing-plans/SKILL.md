@@ -1,6 +1,6 @@
 ---
 name: executing-plans
-description: Use when you have a written implementation plan to execute in a separate session with review checkpoints
+description: Use when you have an implementation plan to execute with review checkpoints
 ---
 
 # Executing Plans
@@ -16,7 +16,7 @@ Load plan, review critically, execute all tasks, report when complete.
 ## The Process
 
 ### Step 1: Load and Review Plan
-1. Read plan file
+1. Load plan — if plan was provided in context (from writing-plans without file save), use it directly. Otherwise read from plan file.
 2. Review critically - identify any questions or concerns about the plan
 3. If concerns: Raise them with your human partner before starting
 4. If no concerns: Create TodoWrite and proceed

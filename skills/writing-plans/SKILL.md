@@ -15,8 +15,9 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 **Context:** This should be run in a dedicated worktree (created by brainstorming skill).
 
-**Save plans to:** `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`
+**Default save location:** `docs/superpowers/plans/YYYY-MM-DD-<feature-name>.md`
 - (User preferences for plan location override this default)
+- Only used if you choose to save to file (see Execution Handoff)
 
 ## Scope Check
 
@@ -133,9 +134,18 @@ If you find issues, fix them inline. No need to re-review — just fix and move 
 
 ## Execution Handoff
 
-After saving the plan, offer execution choice:
+After the plan is complete and self-reviewed in context, offer a save decision first:
 
-**"Plan complete and saved to `docs/superpowers/plans/<filename>.md`. Two execution options:**
+**"Plan complete. Save to file or keep in context only?"**
+
+**1. Save to file** — write to `docs/superpowers/plans/<filename>.md`, resumable later
+**2. Keep in context** — no file written, not resumable across sessions
+
+**If Save chosen:** Write plan to `docs/superpowers/plans/<filename>.md`.
+
+Then offer execution choice (applies to both file and context-only paths):
+
+**"Two execution options:**
 
 **1. Subagent-Driven (recommended)** - I dispatch a fresh subagent per task, review between tasks, fast iteration
 
@@ -146,7 +156,9 @@ After saving the plan, offer execution choice:
 **If Subagent-Driven chosen:**
 - **REQUIRED SUB-SKILL:** Use superpowers:subagent-driven-development
 - Fresh subagent per task + two-stage review
+- If plan is context-only: provide full plan text directly to the skill (no file to read)
 
 **If Inline Execution chosen:**
 - **REQUIRED SUB-SKILL:** Use superpowers:executing-plans
-- Batch execution with checkpoints for review
+- Batch execution with checkpoints
+- If plan is context-only: provide full plan text directly to the skill (no file to read)
