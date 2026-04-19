@@ -84,7 +84,7 @@ git merge <feature-branch>
 git branch -d <feature-branch>
 ```
 
-Then: Cleanup worktree (Step 5)
+Then: Cleanup worktree if applicable (Step 5)
 
 #### Option 2: Push and Create PR
 
@@ -103,13 +103,13 @@ EOF
 )"
 ```
 
-Then: Cleanup worktree (Step 5)
+Then: Cleanup worktree if applicable (Step 5)
 
 #### Option 3: Keep As-Is
 
-Report: "Keeping branch <name>. Worktree preserved at <path>."
+Report: "Keeping branch <name>." If in a worktree, add: "Worktree preserved at <path>."
 
-**Don't cleanup worktree.**
+**Don't cleanup worktree (if one exists).**
 
 #### Option 4: Discard
 
@@ -131,18 +131,21 @@ git checkout <base-branch>
 git branch -D <feature-branch>
 ```
 
-Then: Cleanup worktree (Step 5)
+Then: Cleanup worktree if applicable (Step 5)
 
-### Step 5: Cleanup Worktree
+### Step 5: Cleanup Worktree (if applicable)
 
-**For Options 1, 2, 4:**
+**Only applies if a worktree was used.** Check first:
 
-Check if in worktree:
 ```bash
+# Are we in a worktree?
 git worktree list | grep $(git branch --show-current)
 ```
 
-If yes:
+**If not in a worktree:** Skip this step entirely.
+
+**If in a worktree, for Options 1, 2, 4:**
+
 ```bash
 git worktree remove <worktree-path>
 ```
@@ -169,8 +172,8 @@ git worktree remove <worktree-path>
 - **Fix:** Present exactly 4 structured options
 
 **Automatic worktree cleanup**
-- **Problem:** Remove worktree when might need it (Option 2, 3)
-- **Fix:** Only cleanup for Options 1 and 4
+- **Problem:** Remove worktree when might need it (Option 2, 3), or attempt cleanup when no worktree was used
+- **Fix:** Only cleanup for Options 1 and 4, and only if a worktree is in use
 
 **No confirmation for discard**
 - **Problem:** Accidentally delete work
@@ -188,7 +191,7 @@ git worktree remove <worktree-path>
 - Verify tests before offering options
 - Present exactly 4 options
 - Get typed confirmation for Option 4
-- Clean up worktree for Options 1 & 4 only
+- Clean up worktree for Options 1 & 4 only (if a worktree was used)
 
 ## Integration
 
@@ -197,4 +200,4 @@ git worktree remove <worktree-path>
 - **executing-plans** (Step 5) - After all batches complete
 
 **Pairs with:**
-- **using-git-worktrees** - Cleans up worktree created by that skill
+- **using-git-worktrees** - Cleans up worktree if one was created by that skill

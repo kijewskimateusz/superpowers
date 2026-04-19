@@ -17,7 +17,17 @@ Git worktrees create isolated workspaces sharing the same repository, allowing w
 
 Follow this priority order:
 
-### 1. Check Existing Directories
+### 1. Check Sibling Directory (VS Code default)
+
+```bash
+# Check for sibling worktree directory (created at same level as project root)
+project_root=$(git rev-parse --show-toplevel)
+ls -d "${project_root}.worktrees" 2>/dev/null
+```
+
+**If found:** Use it. This is the VS Code default pattern — a directory named `<project>.worktrees/` adjacent to the project root (e.g., `/foo/bar/myproject.worktrees/`). No `.gitignore` verification needed since it's outside the project.
+
+### 2. Check In-Project Directories
 
 ```bash
 # Check in priority order
@@ -27,7 +37,7 @@ ls -d worktrees 2>/dev/null      # Alternative
 
 **If found:** Use that directory. If both exist, `.worktrees` wins.
 
-### 2. Check CLAUDE.md
+### 3. Check CLAUDE.md
 
 ```bash
 grep -i "worktree.*director" CLAUDE.md 2>/dev/null
@@ -35,20 +45,25 @@ grep -i "worktree.*director" CLAUDE.md 2>/dev/null
 
 **If preference specified:** Use it without asking.
 
-### 3. Ask User
+### 4. Ask User
 
 If no directory exists and no CLAUDE.md preference:
 
 ```
 No worktree directory found. Where should I create worktrees?
 
-1. .worktrees/ (project-local, hidden)
-2. ~/.config/superpowers/worktrees/<project-name>/ (global location)
+1. <project>.worktrees/ (sibling directory, VS Code default — no gitignore needed)
+2. .worktrees/ (project-local, hidden)
+3. ~/.config/superpowers/worktrees/<project-name>/ (global location)
 
 Which would you prefer?
 ```
 
 ## Safety Verification
+
+### For Sibling Directory (<project>.worktrees)
+
+No `.gitignore` verification needed — directory is outside the project entirely.
 
 ### For Project-Local Directories (.worktrees or worktrees)
 
@@ -70,7 +85,7 @@ Per Jesse's rule "Fix broken things immediately":
 
 ### For Global Directory (~/.config/superpowers/worktrees)
 
-No .gitignore verification needed - outside project entirely.
+No `.gitignore` verification needed — outside project entirely.
 
 ## Creation Steps
 
@@ -84,7 +99,12 @@ project=$(basename "$(git rev-parse --show-toplevel)")
 
 ```bash
 # Determine full path
+project_root=$(git rev-parse --show-toplevel)
+
 case $LOCATION in
+  sibling)
+    path="${project_root}.worktrees/$BRANCH_NAME"
+    ;;
   .worktrees|worktrees)
     path="$LOCATION/$BRANCH_NAME"
     ;;
@@ -145,11 +165,13 @@ Ready to implement <feature-name>
 
 | Situation | Action |
 |-----------|--------|
-| `.worktrees/` exists | Use it (verify ignored) |
-| `worktrees/` exists | Use it (verify ignored) |
-| Both exist | Use `.worktrees/` |
-| Neither exists | Check CLAUDE.md → Ask user |
-| Directory not ignored | Add to .gitignore + commit |
+| `<project>.worktrees/` exists (sibling) | Use it (no gitignore needed) |
+| `.worktrees/` exists (in-project) | Use it (verify ignored) |
+| `worktrees/` exists (in-project) | Use it (verify ignored) |
+| Sibling + in-project both exist | Sibling wins |
+| Both in-project exist | Use `.worktrees/` |
+| None exist | Check CLAUDE.md → Ask user |
+| In-project directory not ignored | Add to .gitignore + commit |
 | Tests fail during baseline | Report failures + ask |
 | No package.json/Cargo.toml | Skip dependency install |
 
@@ -163,7 +185,7 @@ Ready to implement <feature-name>
 ### Assuming directory location
 
 - **Problem:** Creates inconsistency, violates project conventions
-- **Fix:** Follow priority: existing > CLAUDE.md > ask
+- **Fix:** Follow priority: sibling > in-project > CLAUDE.md > ask
 
 ### Proceeding with failing tests
 
@@ -175,11 +197,30 @@ Ready to implement <feature-name>
 - **Problem:** Breaks on projects using different tools
 - **Fix:** Auto-detect from project files (package.json, etc.)
 
-## Example Workflow
+## Example Workflows
+
+### Sibling directory (VS Code default)
 
 ```
 You: I'm using the using-git-worktrees skill to set up an isolated workspace.
 
+[Check /Users/jesse/myproject.worktrees/ - exists]
+[Sibling directory — no gitignore verification needed]
+[Create worktree: git worktree add /Users/jesse/myproject.worktrees/auth -b feature/auth]
+[Run npm install]
+[Run npm test - 47 passing]
+
+Worktree ready at /Users/jesse/myproject.worktrees/auth
+Tests passing (47 tests, 0 failures)
+Ready to implement auth feature
+```
+
+### In-project directory
+
+```
+You: I'm using the using-git-worktrees skill to set up an isolated workspace.
+
+[Check myproject.worktrees/ - not found]
 [Check .worktrees/ - exists]
 [Verify ignored - git check-ignore confirms .worktrees/ is ignored]
 [Create worktree: git worktree add .worktrees/auth -b feature/auth]
@@ -201,18 +242,20 @@ Ready to implement auth feature
 - Skip CLAUDE.md check
 
 **Always:**
-- Follow directory priority: existing > CLAUDE.md > ask
-- Verify directory is ignored for project-local
+- Follow directory priority: sibling > in-project > CLAUDE.md > ask
+- Verify directory is ignored for in-project paths (sibling and global skip this)
 - Auto-detect and run project setup
 - Verify clean test baseline
 
 ## Integration
 
-**Called by:**
-- **brainstorming** (Phase 4) - REQUIRED when design is approved and implementation follows
-- **subagent-driven-development** - REQUIRED before executing any tasks
-- **executing-plans** - REQUIRED before executing any tasks
+**Called by (optional):**
+- **brainstorming** - When the user requests worktree isolation or the change is substantial
+- **subagent-driven-development** - When isolation is desired for multi-task execution
+- **executing-plans** - When isolation is desired for plan execution
 - Any skill needing isolated workspace
 
+**When to use:** The user explicitly requests worktree isolation, OR the change is substantial (multi-file, multi-task). Skip for small, focused changes.
+
 **Pairs with:**
-- **finishing-a-development-branch** - REQUIRED for cleanup after work complete
+- **finishing-a-development-branch** - Cleans up worktree if one was used
